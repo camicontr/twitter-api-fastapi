@@ -63,6 +63,18 @@ class Tweet(BaseModel):
     updated_at: Optional[datetime] = Field(default=None)
     by: User = Field(...)
 
+# Auxiliar functions
+
+def save_json(name_json:str, object):
+    with open(name_json+".json", "r+", encoding="utf-8") as f:
+        result = json.loads(f.read())
+        object_dict = object.dict()
+        for key in object_dict.keys():
+            if type(object_dict[key]) is not str:
+                object_dict[key] = str(object_dict[key])
+        result.append(object_dict)
+        f.seek(0)
+        f.write(json.dumps(result))
 
 # Path operations
 
@@ -95,15 +107,8 @@ def signup(
         - last_name: str
         - birth_date: date
     """
-    with open("users.json", "r+", encoding="utf-8") as f:
-        result = json.loads(f.read())
-        user_dict = user.dict()
-        user_dict["user_id"] = str(user_dict["user_id"])
-        user_dict["birth_date"] = str(user_dict["birth_date"])
-        result.append(user_dict)
-        f.seek(0) # escribir despues de la lista yo quiero escribir en mi unica lista 
-        f.write(json.dumps(result))
-        return user
+    save_json("users", user)
+    return user
 
 ### Login a user
 @app.post(
