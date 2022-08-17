@@ -1,1 +1,28 @@
-[]
+[
+    {
+        "tweet_id": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
+        "content": "este es el primer tweet de mi api",
+        "created_at": "2022-08-17 14:01:19.380509",
+        "updated_at": "2022-08-17 19:02:08.910000+00:00",
+        "by": {
+            "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "email": "user@example.com",
+            "first_name": "camilo",
+            "last_name": "string",
+            "birth_date": "1999-08-17"
+        }
+    },
+    {
+        "tweet_id": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
+        "content": "este es el segundo tweet de mi api",
+        "created_at": "2022-08-17 14:01:19.380509",
+        "updated_at": "2022-08-17 19:02:08.910000+00:00",
+        "by": {
+            "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "email": "user@example.com",
+            "first_name": "camilo",
+            "last_name": "string",
+            "birth_date": "1999-08-17"
+        }
+    }
+]
