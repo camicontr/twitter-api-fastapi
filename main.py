@@ -13,6 +13,7 @@ from pydantic import Field
 from fastapi import FastAPI
 from fastapi import status
 from fastapi import Body
+from fastapi import Path
 
 app = FastAPI()
 
@@ -69,12 +70,18 @@ def save_json(name_json:str, object):
     with open(name_json+".json", "r+", encoding="utf-8") as f:
         result = json.loads(f.read())
         object_dict = object.dict()
-        for key in object_dict.keys():
-            if type(object_dict[key]) is not str:
-                object_dict[key] = str(object_dict[key])
         result.append(object_dict)
         f.seek(0)
-        f.write(json.dumps(result))
+        json.dump(result, f, default=str, indent=4)
+
+
+def save_json(name_json:str, object):
+    with open(name_json+".json", "r+", encoding="utf-8") as f:
+        json_list = json.loads(f.read())
+        for object_dict in json_list:
+            tweets["tweet_id"] = str(tweets["tweet_id"])
+            if tweets["tweet_id"] == tweet_id:
+                return  
 
 # Path operations
 
@@ -153,8 +160,36 @@ def show_all_users():
     summary="Show a User",
     tags=["Users"]
 )
-def show_a_user():
-    pass
+def show_a_user(
+    user_id: str = Path(
+        ...,
+        min_length=36,
+        max_length=36,
+        title="User ID",
+        description="This is the user ID. Its required",
+        example="3fa85f64-5717-4562-b3fc-2c963f66afa7"
+        )
+):
+    """
+    This path operation shows a user in the app
+
+    Parameters:
+        Path parameter
+        - user_id: specify id for user
+    
+    Returns a json list with a user in the app, with the following keys: 
+        - user_id: UUID
+        - email: Emailstr
+        - first_name: str
+        - last_name: str
+        - birth_date: datetime
+    """
+    with open("users.json", "r", encoding="utf-8") as f:
+        users_list = json.loads(f.read())
+        for users in users_list:
+            users["user_id"] = str(users["user_id"])
+            if users["user_id"] == user_id:
+                return users
 
 ### Delete a user
 @app.delete( # peticion de eliminacion
@@ -235,19 +270,8 @@ def post(
         - updated_at: Optional[datetime]
         - by: User
     """
-    with open("tweets.json", "r+", encoding="utf-8") as f: 
-        results = json.loads(f.read())
-        tweet_dict = tweet.dict()
-        tweet_dict["tweet_id"] = str(tweet_dict["tweet_id"])
-        tweet_dict["created_at"] = str(tweet_dict["created_at"])
-        tweet_dict["updated_at"] = str(tweet_dict["updated_at"])
-        tweet_dict["by"]["user_id"] = str(tweet_dict["by"]["user_id"])
-        tweet_dict["by"]["birth_date"] = str(tweet_dict["by"]["birth_date"])
-
-        results.append(tweet_dict)
-        f.seek(0)
-        f.write(json.dumps(results))
-        return tweet
+    save_json("tweets", tweet)
+    return tweet
 
 ### Show a tweet
 @app.get(
@@ -257,8 +281,36 @@ def post(
     summary="Show a tweet",
     tags=["Tweets"]
 )
-def show_a_tweet():
-    pass
+def show_a_tweet(
+    tweet_id: str = Path(
+        ...,
+        min_length=36,
+        max_length=36,
+        title="Tweet ID",
+        description="This is the user ID. Its required",
+        example="3fa85f64-5717-4562-b3fc-2c963f66afa7"
+        )
+):
+    """
+    This path operation shows a tweet in the app
+
+    Parameters:
+        Path parameter
+        - tweet_id: tweet id
+    
+    Return a json with the basic tweet information
+        - tweet_id: UUID
+        - content: str
+        - created_at: datetime
+        - updated_at: Optional[datetime]
+        - by: User
+    """
+    with open("tweets.json", "r", encoding="utf-8") as f:
+        tweets_list = json.loads(f.read())
+        for tweets in tweets_list:
+            tweets["tweet_id"] = str(tweets["tweet_id"])
+            if tweets["tweet_id"] == tweet_id:
+                return tweets
 
 ### Delete a tweet
 @app.delete(
