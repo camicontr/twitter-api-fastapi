@@ -1,13 +1,6 @@
-# Python
-import json
-from uuid import UUID
-from datetime import datetime, date
-from typing import Optional, List
-
-# Pydantic
-from pydantic import BaseModel
-from pydantic import EmailStr
-from pydantic import Field
+# Dependence
+from schema import UserBase, User, UserLogin, UserRegister, Tweet
+from models import Tweet_db, User_db
 
 # FastApi
 from fastapi import FastAPI
@@ -16,72 +9,6 @@ from fastapi import Body
 from fastapi import Path
 
 app = FastAPI()
-
-# Models
-
-class UserBase(BaseModel):
-    user_id: UUID = Field(...)
-    email: EmailStr = Field(...)
-
-
-class User(UserBase):
-    first_name: str = Field(
-        ...,
-        min_length=1,
-        max_length=50
-    )
-    last_name: str = Field(
-        ...,
-        min_length=1,
-        max_length=50
-    )
-    birth_date: Optional[date] = Field(default=None)
-
-
-class UserLogin(UserBase):
-        password: str = Field(
-        ...,
-        min_length=8,
-        max_length=64
-    )
-
-
-class UserRegister(User):
-    password: str = Field(
-        ...,
-        min_length=8,
-        max_length=64
-    )
-
-
-class Tweet(BaseModel):
-    tweet_id: UUID = Field(...)
-    content: str = Field(
-        ...,
-        max_length=256,
-        min_length=1)
-    created_at: datetime = Field(default=datetime.now())
-    updated_at: Optional[datetime] = Field(default=None)
-    by: User = Field(...)
-
-# Auxiliar functions
-
-def save_json(name_json:str, object):
-    with open(name_json+".json", "r+", encoding="utf-8") as f:
-        result = json.loads(f.read())
-        object_dict = object.dict()
-        result.append(object_dict)
-        f.seek(0)
-        json.dump(result, f, default=str, indent=4)
-
-
-def save_json(name_json:str, object):
-    with open(name_json+".json", "r+", encoding="utf-8") as f:
-        json_list = json.loads(f.read())
-        for object_dict in json_list:
-            tweets["tweet_id"] = str(tweets["tweet_id"])
-            if tweets["tweet_id"] == tweet_id:
-                return  
 
 # Path operations
 
@@ -114,8 +41,7 @@ def signup(
         - last_name: str
         - birth_date: date
     """
-    save_json("users", user)
-    return user
+    pass
 
 ### Login a user
 @app.post(
@@ -148,9 +74,7 @@ def show_all_users():
         - last_name: str
         - birth_date: datetime
     """
-    with open("users.json", "r", encoding="utf-8") as f:
-        result = json.loads(f.read())
-        return result
+    pass
 
 ### Show a user
 @app.get( # obteniendo informacion 
@@ -166,8 +90,7 @@ def show_a_user(
         min_length=36,
         max_length=36,
         title="User ID",
-        description="This is the user ID. Its required",
-        example="3fa85f64-5717-4562-b3fc-2c963f66afa7"
+        description="This is the user ID. Its required"
         )
 ):
     """
@@ -184,12 +107,7 @@ def show_a_user(
         - last_name: str
         - birth_date: datetime
     """
-    with open("users.json", "r", encoding="utf-8") as f:
-        users_list = json.loads(f.read())
-        for users in users_list:
-            users["user_id"] = str(users["user_id"])
-            if users["user_id"] == user_id:
-                return users
+    pass
 
 ### Delete a user
 @app.delete( # peticion de eliminacion
@@ -239,9 +157,7 @@ def home():
         - updated_at: Optional[datetime]
         - by: User
     """
-    with open("tweets.json", "r", encoding="utf-8") as f:
-        result = json.loads(f.read())
-        return result
+    pass
 
 ### Post a tweet
 @app.post(
@@ -270,8 +186,7 @@ def post(
         - updated_at: Optional[datetime]
         - by: User
     """
-    save_json("tweets", tweet)
-    return tweet
+    pass
 
 ### Show a tweet
 @app.get(
@@ -287,8 +202,7 @@ def show_a_tweet(
         min_length=36,
         max_length=36,
         title="Tweet ID",
-        description="This is the user ID. Its required",
-        example="3fa85f64-5717-4562-b3fc-2c963f66afa7"
+        description="This is the user ID. Its required"
         )
 ):
     """
@@ -305,12 +219,7 @@ def show_a_tweet(
         - updated_at: Optional[datetime]
         - by: User
     """
-    with open("tweets.json", "r", encoding="utf-8") as f:
-        tweets_list = json.loads(f.read())
-        for tweets in tweets_list:
-            tweets["tweet_id"] = str(tweets["tweet_id"])
-            if tweets["tweet_id"] == tweet_id:
-                return tweets
+    pass
 
 ### Delete a tweet
 @app.delete(
