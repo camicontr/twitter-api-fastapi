@@ -8,6 +8,9 @@ h11==0.13.0
 idna==3.3
 psycopg2-binary==2.9.3
 pydantic==1.9.2
+python-dotenv==0.20.0
+python-multipart==0.0.5
+six==1.16.0
 sniffio==1.2.0
 SQLAlchemy==1.4.40
 starlette==0.19.1
