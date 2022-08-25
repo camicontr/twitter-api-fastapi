@@ -31,17 +31,13 @@ class User(BaseModel):
         orm_mode = True
 
 
-class UserLogin(BaseModel):
+class UserRegister(UserBase, User):
     email: EmailStr = Field(...)
     password: str = Field(
         ...,
         min_length=8,
         max_length=64
     )
-
-
-class UserRegister(UserBase, User, UserLogin):
-    pass
 
 
 class Tweet(BaseModel):

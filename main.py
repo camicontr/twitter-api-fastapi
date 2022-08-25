@@ -2,11 +2,15 @@
 from typing import List
 from datetime import date
 
+# Pydantic
+from pydantic import EmailStr
+
 # FastApi
 from fastapi import FastAPI
 from fastapi import HTTPException
 from fastapi import Depends
 from fastapi import status
+from fastapi import Form
 from fastapi import Body
 from fastapi import Path
 
@@ -14,7 +18,7 @@ from fastapi import Path
 from sqlalchemy.orm import Session
 
 # Dependence
-from schema import User, UserLogin, UserRegister, Tweet, TweetPost
+from schema import User, UserRegister, Tweet, TweetPost
 from models import Tweets, Users
 from database import SessionLocal, engine
 
@@ -85,7 +89,8 @@ def signup(
     tags=["Users"]
 )
 def login(
-    user: UserLogin = Body(...),
+    user_email: EmailStr = Form(...),
+    user_password:str = Form(...),
     db: Session = Depends(get_db)
 ):
     """
@@ -94,15 +99,17 @@ def login(
     This path operation login a user in the app
 
     Parameters:
-        - Request body parameter
-            - user: UserLogin
+    - Form parameter
+        - user_email: This is the user email from user
+    - Form parameter
+        - user_password: This is the password from user
 
     Returns a dict with a user in the app, with the following keys: 
         - first_name: str
         - last_name: str
         - birth_date: datetime
     """
-    login = db.query(Users).filter(Users.email == user.email, Users.hashed_password == user.password).first()
+    login = db.query(Users).filter(Users.email == user_email, Users.hashed_password == user_password).first()
     if login is None:
         raise HTTPException(status_code=404, detail="Login denied")
     return login
