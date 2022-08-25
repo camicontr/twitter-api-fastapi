@@ -9,7 +9,7 @@ from database import Base, engine
 class Users(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, unique=True)
     first_name = Column(String)
     last_name = Column(String)
     email = Column(String, unique=True)
@@ -20,7 +20,7 @@ class Users(Base):
 class Tweets(Base):
     __tablename__ = "tweets"
 
-    id = Column(UUID(as_uuid=True), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, unique=True)
     content = Column(String)
     time_created = Column(DateTime(timezone=True), server_default=func.now())
     time_updated = Column(DateTime(timezone=True), onupdate=func.now())

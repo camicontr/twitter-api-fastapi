@@ -11,7 +11,6 @@ from pydantic import Field
 
 class UserBase(BaseModel):
     user_id: UUID = Field(...)
-    email: EmailStr = Field(...)
     class Config:
         orm_mode = True
 
@@ -32,20 +31,17 @@ class User(BaseModel):
         orm_mode = True
 
 
-class UserLogin(UserBase, User):
-        password: str = Field(
-        ...,
-        min_length=8,
-        max_length=64
-    )
-
-
-class UserRegister(UserBase, User):
+class UserLogin(BaseModel):
+    email: EmailStr = Field(...)
     password: str = Field(
         ...,
         min_length=8,
         max_length=64
     )
+
+
+class UserRegister(UserBase, User, UserLogin):
+    pass
 
 
 class Tweet(BaseModel):
