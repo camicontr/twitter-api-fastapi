@@ -34,9 +34,12 @@ Configure the server in pgadmin
 ```bash
 docker start twitter-api-fastapi_app
 ```
+
 At this moment the app can already connect to the database
-5. Go into 
+
+4. Go into 
 ```bash
 http://localhost:8000/docs
 ```
+
 here you will find all the documentation and you can use the api.
