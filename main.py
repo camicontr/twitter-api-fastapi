@@ -1,8 +1,3 @@
-# Dependence
-from schema import UserBase, User, UserLogin, UserRegister, Tweet
-from models import Tweets, Users
-from database import SessionLocal, engine
-
 # Python
 from typing import List
 from datetime import date
@@ -18,11 +13,17 @@ from fastapi import Path
 # Sqlalchemy
 from sqlalchemy.orm import Session
 
+# Dependence
+from schema import User, UserLogin, UserRegister, Tweet, TweetPost
+from models import Tweets, Users
+from database import SessionLocal, engine
+
 
 app = FastAPI()
 
 
 # Dependency
+
 def get_db():
     db = SessionLocal()
     try:
@@ -96,7 +97,7 @@ def login(
         - Request body parameter
             - user: UserLogin
 
-    Returns a json list with a user in the app, with the following keys: 
+    Returns a dict with a user in the app, with the following keys: 
         - first_name: str
         - last_name: str
         - birth_date: datetime
@@ -125,13 +126,12 @@ def show_all_users(
     Parameters: 
         -
 
-    Returns a json list with all users in the app, with the following keys: 
+    Returns a list of dicts with all users in the app, with the following keys: 
         - first_name: str
         - last_name: str
         - birth_date: datetime
     """
     users = db.query(Users).all()
-    
     return users
 
 ### Show a user
@@ -160,7 +160,7 @@ def show_a_user(
         Path parameter
         - user_id: specify id for user
     
-    Returns a json list with a user in the app, with the following keys:
+    Returns a dict with a user in the app, with the following keys:
         - first_name: str
         - last_name: str
         - birth_date: datetime
@@ -195,10 +195,7 @@ def delete_a_user(
         Path parameter
         - user_id: specify id for user
     
-    Returns a json list with a deleted user in the app, with the following keys:
-        - first_name: str
-        - last_name: str
-        - birth_date: datetime
+    Returns a dict with user id deleted in the app:
     """
     db.query(Users).filter(Users.id == user_id).delete(synchronize_session="fetch")
     db.commit()
@@ -239,7 +236,7 @@ def update_a_user(
         - hashed_password_up: new password
         - birth_date_up: new birth date
     
-    Returns a json list with a deleted user in the app, with the following keys:
+    Returns a dict with a updated user in the app, with the following keys:
         - first_name: str
         - last_name: str
         - birth_date: datetime
@@ -263,7 +260,9 @@ def update_a_user(
     summary="Show all Tweets",
     tags=["Tweets"]
 )
-def home():
+def home(
+    db: Session = Depends(get_db)
+):
     """
     Home
 
@@ -273,13 +272,13 @@ def home():
         -
 
     Returns a json list with all tweets in the app, with the following keys: 
-        - tweet_id: UUID
         - content: str
         - created_at: datetime
         - updated_at: Optional[datetime]
-        - by: User
+        - user_id: UUID
     """
-    pass
+    tweets = db.query(Tweets).all()
+    return tweets
 
 ### Post a tweet
 @app.post(
@@ -290,7 +289,8 @@ def home():
     tags=["Tweets"]
 )
 def post(
-    tweet: Tweet = Body(...)
+    tweet: TweetPost = Body(...),
+    db: Session = Depends(get_db)
 ):
     """
     Post a tweet
@@ -302,13 +302,24 @@ def post(
             - tweet: Tweet
 
     Return a json with the basic tweet information
-        - tweet_id: UUID
         - content: str
         - created_at: datetime
         - updated_at: Optional[datetime]
-        - by: User
+        - user_id: UUID
     """
-    pass
+    db_tweet = Tweets(
+        id=tweet.tweet_id,
+        content=tweet.content,
+        time_created=tweet.created_at,
+        time_updated=tweet.updated_at,
+        user_id=tweet.user_id
+        )
+    if db_tweet is None:
+        raise HTTPException(status_code=400, detail="User not exist")
+    db.add(db_tweet)
+    db.commit()
+    db.refresh(db_tweet)
+    return db_tweet
 
 ### Show a tweet
 @app.get(
@@ -324,8 +335,10 @@ def show_a_tweet(
         min_length=36,
         max_length=36,
         title="Tweet ID",
-        description="This is the user ID. Its required"
-        )
+        description="This is the user ID. Its required",
+        example="1fa25f64-5717-4562-b3fc-2c963f66afa5"
+        ),
+    db: Session = Depends(get_db)
 ):
     """
     This path operation shows a tweet in the app
@@ -335,24 +348,46 @@ def show_a_tweet(
         - tweet_id: tweet id
     
     Return a json with the basic tweet information
-        - tweet_id: UUID
         - content: str
         - created_at: datetime
         - updated_at: Optional[datetime]
-        - by: User
+        - user_id: UUID
     """
-    pass
+    tweet = db.query(Tweets).filter(Tweets.id == tweet_id).first()
+    if tweet is None:
+        raise HTTPException(status_code=404, detail="Tweet not found")
+    return tweet
 
 ### Delete a tweet
 @app.delete(
     path="/tweets/{tweet_id}/delete",
-    response_model=Tweet,
     status_code=status.HTTP_200_OK,
     summary="Delete a tweet",
     tags=["Tweets"]
 )
-def delete_a_tweet():
-    pass
+def delete_a_tweet(
+    tweet_id: str = Path(
+        ...,
+        min_length=36,
+        max_length=36,
+        title="Tweet ID",
+        description="This is the user ID. Its required",
+        example="3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        ),
+    db: Session = Depends(get_db)
+):  
+    """
+    This path operation delete a tweet in the app
+
+    Parameters:
+        Path parameter
+        - tweet_id: specify id for user
+    
+    Returns a dict with tweet id deleted:
+    """
+    db.query(Tweets).filter(Tweets.id == tweet_id).delete(synchronize_session="fetch")
+    db.commit()
+    return {"tweet id deleted":tweet_id}
 
 ### Update a tweet
 @app.put( # put para actualizar 
@@ -362,5 +397,40 @@ def delete_a_tweet():
     summary="Update a tweet",
     tags=["Tweets"]
 )
-def update_a_tweet():
-    pass
+def update_a_tweet(
+    tweet_id: str = Path(
+        ...,
+        min_length=36,
+        max_length=36,
+        title="Tweet ID",
+        description="This is the user ID. Its required",
+        example="3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        ),
+    db: Session = Depends(get_db),
+    content_up: str = Body(
+        ...,
+        max_length=256,
+        min_length=1),
+):
+    """
+    This path operation update the content in a tweet
+
+    Parameters:
+        Path parameter
+        - tweet_id: specify id for user
+        Body parameter
+        - content_up: new content for the tweet
+    
+    Returns a dict with a updated tweet in the app, with the following keys:
+        - content: str
+        - created_at: datetime
+        - updated_at: Optional[datetime]
+        - user_id: UUID
+    """
+    db.query(Tweets).filter(Tweets.id == tweet_id).update(
+        {"content":content_up
+        }, synchronize_session="fetch"
+        )
+    db.commit()
+    tweet_up = show_a_tweet(tweet_id, db)
+    return tweet_up
