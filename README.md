@@ -30,10 +30,11 @@ To run the API in the Docker container, run the following command:
 Configure the server in pgadmin
 1. Go into pgadmin localhost:80, with user: admin@admin.com and password: admin
 2. Register a new server with name: DockerConnect, hostname: db, user and password: postgres
-3. use
+3. Use
 ```bash
 docker start twitter-api-fastapi_app
 ```
+At this moment the app can already connect to the database
 5. Go into 
 ```bash
 http://localhost:8000/docs
