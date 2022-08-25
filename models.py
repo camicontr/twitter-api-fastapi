@@ -1,28 +1,30 @@
 # Sqlalchemy
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from .database import Base
+from database import Base, engine
 
 
-class Tweet_db(Base):
+class Users(Base):
+    __tablename__ = "users"
+
+    id = Column(UUID(as_uuid=True), primary_key=True)
+    first_name = Column(String)
+    last_name = Column(String)
+    email = Column(String, unique=True)
+    hashed_password = Column(String)
+    birth_date = Column(DateTime)
+
+
+class Tweets(Base):
     __tablename__ = "tweets"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True)
     content = Column(String)
     time_created = Column(DateTime(timezone=True), server_default=func.now())
     time_updated = Column(DateTime(timezone=True), onupdate=func.now())
-    user_id = Column(Integer, ForeignKey("user.id"))
-
-    user = relationship("User_db")
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
 
 
-class User_db(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    first_name = Column(String, index=True)
-    last_name = Column(String, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    birth_date = Column(DateTime)
+Base.metadata.create_all(engine)

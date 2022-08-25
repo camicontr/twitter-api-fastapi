@@ -1,7 +1,7 @@
 # Python
 from uuid import UUID
 from datetime import datetime, date
-from typing import Optional, List
+from typing import Optional
 
 # Pydantic
 from pydantic import BaseModel
@@ -12,9 +12,11 @@ from pydantic import Field
 class UserBase(BaseModel):
     user_id: UUID = Field(...)
     email: EmailStr = Field(...)
+    class Config:
+        orm_mode = True
 
 
-class User(UserBase):
+class User(BaseModel):
     first_name: str = Field(
         ...,
         min_length=1,
@@ -26,9 +28,11 @@ class User(UserBase):
         max_length=50
     )
     birth_date: Optional[date] = Field(default=None)
+    class Config:
+        orm_mode = True
 
 
-class UserLogin(UserBase):
+class UserLogin(UserBase, User):
         password: str = Field(
         ...,
         min_length=8,
@@ -36,7 +40,7 @@ class UserLogin(UserBase):
     )
 
 
-class UserRegister(User):
+class UserRegister(UserBase, User):
     password: str = Field(
         ...,
         min_length=8,
@@ -53,3 +57,5 @@ class Tweet(BaseModel):
     created_at: datetime = Field(default=datetime.now())
     updated_at: Optional[datetime] = Field(default=None)
     by: User = Field(...)
+    class Config:
+        orm_mode = True

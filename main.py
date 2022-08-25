@@ -1,14 +1,32 @@
 # Dependence
 from schema import UserBase, User, UserLogin, UserRegister, Tweet
-from models import Tweet_db, User_db
+from models import Tweets, Users
+from database import SessionLocal, engine
+
+# Python
+from typing import List
 
 # FastApi
 from fastapi import FastAPI
+from fastapi import Depends
 from fastapi import status
 from fastapi import Body
 from fastapi import Path
 
+# Sqlalchemy
+from sqlalchemy.orm import Session
+
+
 app = FastAPI()
+
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Path operations
 
@@ -23,7 +41,8 @@ app = FastAPI()
     tags=["Users"]
 )
 def signup(
-    user: UserRegister = Body(...)
+    user: UserRegister = Body(...),
+    db: Session = Depends(get_db)
     ):
     """
     Signup
@@ -34,14 +53,23 @@ def signup(
         - Request body parameter
             - user: UserRegister
 
-    Return a json with the basic user information
-        - user_id: UUID
-        - email: EmailStr
+    Return a dict with the basic user information
         - first_name: str
         - last_name: str
         - birth_date: date
     """
-    pass
+    db_user = Users(
+        id=user.user_id,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email,
+        hashed_password=user.password+"notreallyhashed",
+        birth_date=user.birth_date
+        )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 ### Login a user
 @app.post(
