@@ -1,7 +1,7 @@
 # Twitter-Api
 
 ## Introduction 
-This application is the final project of the [**Curso de FastAPI: Modularización, Datos Avanzados y Errores**](https://platzi.com/cursos/fastapi-modularizacion-datos/) course of platzi. This app simulates the basic functions of twitter as well as adding tweet updates
+This application is the final project of the [**Curso de FastAPI: Modularización, Datos Avanzados y Errores**](https://platzi.com/cursos/fastapi-modularizacion-datos/) course of platzi. This app adds to the tweet updates feature. The user and tweet data is stored in a PostgreSQL database, it also has validations and restrictions.
 
 ## Depedencies
 Dependencies for Docker:
